@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Countdown Timer</title>
+  <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+<link rel="shortcut icon" href="/assets/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="New Year Countdown" />
+<link rel="manifest" href="/assets/site.webmanifest" />
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
-          flex-direction:column;
-          row-gap:50px;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -17,19 +21,39 @@
             color: #fff;
             text-align: center;
         }
+  #wrapper{
+    display: flex;
+            justify-content: center;
+            align-items: center;
+    flex-direction:column;
+  }
+  footer{margin-top:3rem}
         .timer {
             font-size: 2rem;
             font-weight: bold;
         }
+        #installBtn {
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="timer" id="countdown">Loading...</div>
-<footer>by Mehrdad, HAPPY NEW YEAR 🎉</footer>
+    <div id="wrapper">
+        <div class="timer" id="countdown">Loading...</div>
+        <button id="installBtn">Install App</button>
+      <footer>by Mehrdad, Happy new year 🎉🎆</footer>
+    </div>
 
     <script>
         function updateCountdown() {
-            const targetTime = new Date("2025-03-20T12:31:30+03:30").getTime(); // Tehran time (UTC+3:30)
+            const targetTime = new Date("2025-03-20T12:31:30+03:30").getTime();
             const now = new Date().getTime();
             const difference = targetTime - now;
 
@@ -47,8 +71,34 @@
                 `${days}d ${hours}h ${minutes}m ${seconds}s`;
         }
 
-        updateCountdown(); // Initial call
-        setInterval(updateCountdown, 1000); // Update every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
+        // PWA Installation Button
+        let deferredPrompt;
+        const installBtn = document.getElementById("installBtn");
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            deferredPrompt = event;
+            installBtn.style.display = "block";
+
+            installBtn.addEventListener("click", () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === "accepted") {
+                        console.log("User installed the app");
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = "none";
+                });
+            });
+        });
     </script>
 </body>
 </html>
